@@ -3,14 +3,14 @@
  * Parses CSV files containing question data into Question objects
  */
 
-import { Question } from '../models/question.js';
+import { Question, QuestionData } from '../models/question.js';
 
 /**
  * Parse CSV text into an array of Question objects
- * @param {string} csvText - Raw CSV text content
- * @returns {Array<Question>} Array of Question objects
+ * @param csvText - Raw CSV text content
+ * @returns Array of Question objects
  */
-export function parseQuestionsFromCSV(csvText) {
+export function parseQuestionsFromCSV(csvText: string): Question[] {
   const lines = csvText.trim().split('\n');
   
   if (lines.length < 2) {
@@ -19,7 +19,7 @@ export function parseQuestionsFromCSV(csvText) {
 
   // Parse header row
   const headers = parseCSVLine(lines[0]);
-  const headerMap = {};
+  const headerMap: Record<string, number> = {};
   headers.forEach((header, index) => {
     headerMap[header.trim()] = index;
   });
@@ -33,7 +33,7 @@ export function parseQuestionsFromCSV(csvText) {
   }
 
   // Parse data rows
-  const questions = [];
+  const questions: Question[] = [];
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue; // Skip empty lines
@@ -41,7 +41,7 @@ export function parseQuestionsFromCSV(csvText) {
     const values = parseCSVLine(line);
     
     // Extract values based on header positions
-    const questionData = {
+    const questionData: QuestionData = {
       question: values[headerMap['Question']] || '',
       topic: values[headerMap['Topic']] || '',
       subtopic: values[headerMap['Subtopic']] || '',
@@ -67,11 +67,11 @@ export function parseQuestionsFromCSV(csvText) {
 
 /**
  * Parse a single CSV line, handling quoted values
- * @param {string} line - CSV line text
- * @returns {Array<string>} Array of field values
+ * @param line - CSV line text
+ * @returns Array of field values
  */
-function parseCSVLine(line) {
-  const values = [];
+function parseCSVLine(line: string): string[] {
+  const values: string[] = [];
   let current = '';
   let inQuotes = false;
 
@@ -104,10 +104,10 @@ function parseCSVLine(line) {
 
 /**
  * Load and parse a CSV file
- * @param {string} filePath - Path to CSV file (relative to public or data directory)
- * @returns {Promise<Array<Question>>} Promise that resolves to array of Question objects
+ * @param filePath - Path to CSV file (relative to public or data directory)
+ * @returns Promise that resolves to array of Question objects
  */
-export async function loadQuestionsFromCSV(filePath) {
+export async function loadQuestionsFromCSV(filePath: string): Promise<Question[]> {
   try {
     const response = await fetch(filePath);
     if (!response.ok) {
