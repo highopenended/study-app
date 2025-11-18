@@ -1,36 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import ChooseData from './pages/ChooseData';
+import ExamPreface from './pages/ExamPreface';
+import { Question } from './models/question';
+import './App.css';
+
+type AppView = 'choose-data' | 'exam-preface';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentView, setCurrentView] = useState<AppView>('choose-data');
+  const [questions, setQuestions] = useState<Question[]>([]);
+
+  const handleQuestionsLoaded = (loadedQuestions: Question[]) => {
+    setQuestions(loadedQuestions);
+    setCurrentView('exam-preface');
+  };
+
+  const handleStartExam = () => {
+    // TODO: Navigate to QuestionView
+    console.log('Start exam clicked');
+  };
+
+  const handleBack = () => {
+    setCurrentView('choose-data');
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      {currentView === 'choose-data' && (
+        <ChooseData onQuestionsLoaded={handleQuestionsLoaded} />
+      )}
+      {currentView === 'exam-preface' && (
+        <ExamPreface 
+          questions={questions} 
+          onStartExam={handleStartExam}
+          onBack={handleBack}
+        />
+      )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
 

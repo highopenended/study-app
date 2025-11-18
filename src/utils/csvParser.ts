@@ -11,7 +11,14 @@ import { Question, QuestionData } from '../models/question.js';
  * @returns Array of Question objects
  */
 export function parseQuestionsFromCSV(csvText: string): Question[] {
-  const lines = csvText.trim().split('\n');
+  // Remove BOM if present
+  let text = csvText.trim();
+  if (text.charCodeAt(0) === 0xFEFF) {
+    text = text.slice(1);
+  }
+  
+  // Handle both \r\n and \n line endings
+  const lines = text.split(/\r?\n/).filter(line => line.trim());
   
   if (lines.length < 2) {
     return []; // Need at least header + 1 data row
@@ -21,15 +28,20 @@ export function parseQuestionsFromCSV(csvText: string): Question[] {
   const headers = parseCSVLine(lines[0]);
   const headerMap: Record<string, number> = {};
   headers.forEach((header, index) => {
-    headerMap[header.trim()] = index;
+    const trimmedHeader = header.trim();
+    headerMap[trimmedHeader] = index;
   });
 
   // Validate required headers
   const requiredHeaders = ['Question', 'Option 1', 'Option 2', 'Option 3', 'Option 4', 'Correct Answer'];
-  const missingHeaders = requiredHeaders.filter(header => !headerMap[header]);
+  const missingHeaders = requiredHeaders.filter(header => !(header in headerMap));
   
   if (missingHeaders.length > 0) {
-    throw new Error(`Missing required CSV headers: ${missingHeaders.join(', ')}`);
+    const foundHeaders = Object.keys(headerMap);
+    throw new Error(
+      `Missing required CSV headers: ${missingHeaders.join(', ')}. ` +
+      `Found headers: ${foundHeaders.join(', ')}`
+    );
   }
 
   // Parse data rows
