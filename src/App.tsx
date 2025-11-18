@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import ChooseData from './pages/ChooseData';
 import ExamPreface from './pages/ExamPreface';
+import QuestionView from './pages/QuestionView';
 import { Question } from './models/question';
 import './App.css';
 
-type AppView = 'choose-data' | 'exam-preface';
+type AppView = 'choose-data' | 'exam-preface' | 'question-view';
 
 function App() {
   const [currentView, setCurrentView] = useState<AppView>('choose-data');
@@ -16,12 +17,16 @@ function App() {
   };
 
   const handleStartExam = () => {
-    // TODO: Navigate to QuestionView
-    console.log('Start exam clicked');
+    setCurrentView('question-view');
   };
 
   const handleBack = () => {
     setCurrentView('choose-data');
+  };
+
+  const handleExamComplete = () => {
+    // TODO: Navigate to ExamSummary
+    console.log('Exam completed');
   };
 
   return (
@@ -34,6 +39,12 @@ function App() {
           questions={questions} 
           onStartExam={handleStartExam}
           onBack={handleBack}
+        />
+      )}
+      {currentView === 'question-view' && (
+        <QuestionView 
+          questions={questions}
+          onComplete={handleExamComplete}
         />
       )}
     </>
