@@ -12,50 +12,65 @@ interface ChooseDataProps {
 }
 
 export default function ChooseData({ onQuestionsLoaded }: ChooseDataProps) {
-  const [loading, setLoading] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileSelect = async (filename: string) => {
-    setLoading(filename);
+  const handleFileSelect = (filename: string) => {
+    setSelectedFile(filename);
+    setError(null);
+  };
+
+  const handleContinue = async () => {
+    if (!selectedFile) return;
+
+    setLoading(true);
     setError(null);
 
     try {
-      const filePath = getDataFilePath(filename);
+      const filePath = getDataFilePath(selectedFile);
       const loadedQuestions = await loadQuestionsFromCSV(filePath);
       onQuestionsLoaded(loadedQuestions);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load questions');
-      setLoading(null);
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h1>Choose Study Data</h1>
-      <p>Select a question file to begin:</p>
-      {error && (
-        <div style={{ color: 'red', marginBottom: '1rem' }}>
-          Error: {error}
-        </div>
-      )}
-      <ul>
-        {AVAILABLE_DATA_FILES.map((filename) => (
-          <li key={filename}>
-            <button
-              onClick={() => handleFileSelect(filename)}
-              disabled={loading !== null}
-              style={{
-                padding: '0.5rem 1rem',
-                margin: '0.25rem 0',
-                cursor: loading !== null ? 'not-allowed' : 'pointer',
-                opacity: loading !== null && loading !== filename ? 0.6 : 1,
-              }}
-            >
-              {loading === filename ? 'Loading...' : filename}
-            </button>
-          </li>
-        ))}
-      </ul>
+    <div className="page-container">
+      <div className="card">
+        <h1>Choose Study Data</h1>
+        <p className="card-text">Select a question file to begin:</p>
+        {error && (
+          <div className="error-message">
+            Error: {error}
+          </div>
+        )}
+        <ul className="file-list">
+          {AVAILABLE_DATA_FILES.map((filename) => (
+            <li key={filename}>
+              <button
+                onClick={() => handleFileSelect(filename)}
+                disabled={loading}
+                className={`btn-list ${selectedFile === filename ? 'btn-list-selected' : ''}`}
+              >
+                {filename}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="button-group">
+        <button
+          onClick={handleContinue}
+          disabled={!selectedFile || loading}
+          className="btn-primary"
+        >
+          {loading ? 'Loading...' : 'Continue'}
+        </button>
+      </div>
     </div>
   );
 }
