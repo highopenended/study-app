@@ -63,7 +63,7 @@ export default function ExamSummary({ questions, selectedAnswers, onRestart }: E
             {score.passed ? 'You have passed the exam.' : 'You have not passed the exam.'}
           </div>
           
-          <div className="passing-score">
+          <div className="card-text">
             Passing score: 80%
           </div>
 
