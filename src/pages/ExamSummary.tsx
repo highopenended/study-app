@@ -28,6 +28,13 @@ interface CategoryScore {
 }
 
 /**
+ * Check if a question was answered correctly
+ */
+function isQuestionCorrect(question: Question, selectedAnswer: number | undefined): boolean {
+  return selectedAnswer !== undefined && question.correctAnswer !== null && question.isCorrect(selectedAnswer);
+}
+
+/**
  * Calculate overall exam score
  */
 function calculateScore(questions: Question[], selectedAnswers: Record<number, number>): ScoreResult {
@@ -36,17 +43,7 @@ function calculateScore(questions: Question[], selectedAnswers: Record<number, n
   const total = questions.length;
 
   questions.forEach((question, index) => {
-    const selectedAnswer = selectedAnswers[index];
-    if (selectedAnswer !== undefined && question.correctAnswer !== null) {
-      if (question.isCorrect(selectedAnswer)) {
-        correct++;
-      } else {
-        incorrect++;
-      }
-    } else {
-      // Unanswered questions count as incorrect
-      incorrect++;
-    }
+    isQuestionCorrect(question, selectedAnswers[index]) ? correct++ : incorrect++;
   });
 
   const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
@@ -63,7 +60,6 @@ function calculateCategoryScores(questions: Question[], selectedAnswers: Record<
 
   questions.forEach((question, index) => {
     const topic = question.topic || 'Uncategorized';
-    const selectedAnswer = selectedAnswers[index];
 
     if (!categoryMap[topic]) {
       categoryMap[topic] = { correct: 0, incorrect: 0, total: 0 };
@@ -71,14 +67,9 @@ function calculateCategoryScores(questions: Question[], selectedAnswers: Record<
 
     categoryMap[topic].total++;
 
-    if (selectedAnswer !== undefined && question.correctAnswer !== null) {
-      if (question.isCorrect(selectedAnswer)) {
-        categoryMap[topic].correct++;
-      } else {
-        categoryMap[topic].incorrect++;
-      }
+    if (isQuestionCorrect(question, selectedAnswers[index])) {
+      categoryMap[topic].correct++;
     } else {
-      // Unanswered questions count as incorrect
       categoryMap[topic].incorrect++;
     }
   });
@@ -104,11 +95,11 @@ export default function ExamSummary({ questions, selectedAnswers, onRestart }: E
       <div className="card">
         {/* Score Display Section */}
         <div className="score-display">
-          <h1 className={`score-percentage ${score.passed ? 'score-passed' : 'score-failed'}`}>
+          <h1 className={`score-percentage ${score.passed ? 'text-success' : 'text-error'}`}>
             Your score: {score.percentage}%
           </h1>
           
-          <div className={`pass-indicator ${score.passed ? 'pass-indicator-passed' : 'pass-indicator-failed'}`}>
+          <div className={`pass-indicator ${score.passed ? 'text-success' : 'text-error'}`}>
             {score.passed ? 'You have passed the exam.' : 'You have not passed the exam.'}
           </div>
           
@@ -159,7 +150,7 @@ export default function ExamSummary({ questions, selectedAnswers, onRestart }: E
                     <span className="score-icon">✗</span>
                     <span>Incorrect: {category.incorrect}</span>
                   </div>
-                  <div className={`category-percentage ${category.percentage >= 80 ? 'category-percentage-passed' : 'category-percentage-failed'}`}>
+                  <div className={`category-percentage ${category.percentage >= 80 ? 'text-success' : 'text-error'}`}>
                     {category.percentage}%
                   </div>
                 </div>
@@ -191,10 +182,10 @@ export default function ExamSummary({ questions, selectedAnswers, onRestart }: E
                 {(question.topic || question.subtopic) && (
                   <div className="summary-question-meta">
                     {question.topic && (
-                      <span className="summary-topic">Topic: {question.topic}</span>
+                      <span className="summary-meta-tag">Topic: {question.topic}</span>
                     )}
                     {question.subtopic && (
-                      <span className="summary-subtopic">Subtopic: {question.subtopic}</span>
+                      <span className="summary-meta-tag">Subtopic: {question.subtopic}</span>
                     )}
                   </div>
                 )}
@@ -203,24 +194,17 @@ export default function ExamSummary({ questions, selectedAnswers, onRestart }: E
                   {[1, 2, 3, 4].map((optionNum) => {
                     const optionText = question.getOption(optionNum);
                     const isCorrectAnswer = correctAnswerNum === optionNum;
-                    const isUserAnswer = selectedAnswer === optionNum;
-                    const isUserWrongAnswer = isUserAnswer && !isCorrect;
+                    const isUserWrongAnswer = selectedAnswer === optionNum && !isCorrect;
 
-                    let optionClass = 'summary-answer-option';
-                    if (isCorrectAnswer) {
-                      optionClass += ' summary-answer-correct';
-                    } else if (isUserWrongAnswer) {
-                      optionClass += ' summary-answer-incorrect';
-                    }
+                    const optionClass = `summary-answer-option ${
+                      isCorrectAnswer ? 'summary-answer-correct' : 
+                      isUserWrongAnswer ? 'summary-answer-incorrect' : ''
+                    }`.trim();
 
                     return (
                       <div key={optionNum} className={optionClass}>
-                        {isCorrectAnswer && (
-                          <span className="summary-answer-icon">✓</span>
-                        )}
-                        {isUserWrongAnswer && (
-                          <span className="summary-answer-icon">✗</span>
-                        )}
+                        {isCorrectAnswer && <span className="summary-answer-icon">✓</span>}
+                        {isUserWrongAnswer && <span className="summary-answer-icon">✗</span>}
                         <span className="summary-answer-text">{optionText}</span>
                       </div>
                     );
