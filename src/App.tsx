@@ -2,14 +2,16 @@ import { useState } from 'react';
 import ChooseData from './pages/ChooseData';
 import ExamPreface from './pages/ExamPreface';
 import QuestionView from './pages/QuestionView';
+import ExamSummary from './pages/ExamSummary';
 import { Question } from './models/question';
 import './App.css';
 
-type AppView = 'choose-data' | 'exam-preface' | 'question-view';
+type AppView = 'choose-data' | 'exam-preface' | 'question-view' | 'exam-summary';
 
 function App() {
   const [currentView, setCurrentView] = useState<AppView>('choose-data');
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
 
   const handleQuestionsLoaded = (loadedQuestions: Question[]) => {
     setQuestions(loadedQuestions);
@@ -18,15 +20,21 @@ function App() {
 
   const handleStartExam = () => {
     setCurrentView('question-view');
+    setSelectedAnswers({}); // Reset answers when starting new exam
   };
 
   const handleBack = () => {
     setCurrentView('choose-data');
   };
 
-  const handleExamComplete = () => {
-    // TODO: Navigate to ExamSummary
-    console.log('Exam completed');
+  const handleExamComplete = (answers: Record<number, number>) => {
+    setSelectedAnswers(answers);
+    setCurrentView('exam-summary');
+  };
+
+  const handleRestart = () => {
+    setCurrentView('choose-data');
+    setSelectedAnswers({});
   };
 
   return (
@@ -45,6 +53,13 @@ function App() {
         <QuestionView 
           questions={questions}
           onComplete={handleExamComplete}
+        />
+      )}
+      {currentView === 'exam-summary' && (
+        <ExamSummary 
+          questions={questions}
+          selectedAnswers={selectedAnswers}
+          onRestart={handleRestart}
         />
       )}
     </>

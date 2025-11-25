@@ -125,7 +125,12 @@ export async function loadQuestionsFromCSV(filePath: string): Promise<Question[]
     if (!response.ok) {
       throw new Error(`Failed to load CSV file: ${response.statusText}`);
     }
-    const csvText = await response.text();
+    
+    // Explicitly decode as UTF-8 to handle international characters (e.g., Japanese)
+    const arrayBuffer = await response.arrayBuffer();
+    const decoder = new TextDecoder('utf-8');
+    const csvText = decoder.decode(arrayBuffer);
+    
     return parseQuestionsFromCSV(csvText);
   } catch (error) {
     console.error(`Error loading questions from ${filePath}:`, error);

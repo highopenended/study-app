@@ -7,7 +7,7 @@ import { Question } from '../models/question';
 
 interface QuestionViewProps {
   questions: Question[];
-  onComplete: () => void;
+  onComplete: (selectedAnswers: Record<number, number>) => void;
 }
 
 export default function QuestionView({ questions, onComplete }: QuestionViewProps) {
@@ -40,6 +40,12 @@ export default function QuestionView({ questions, onComplete }: QuestionViewProp
       setCurrentIndex(currentIndex + 1);
     }
   };
+
+  const handleFinishExam = () => {
+    onComplete(selectedAnswers);
+  };
+
+  const isLastQuestion = currentIndex === totalQuestions - 1;
 
   const handleStarToggle = () => {
     const newStarred = new Set(starredQuestions);
@@ -115,13 +121,23 @@ export default function QuestionView({ questions, onComplete }: QuestionViewProp
             >
               Previous
             </button>
-            <button
-              onClick={handleNext}
-              disabled={!selectedAnswer || currentIndex === totalQuestions - 1}
-              className="btn-primary"
-            >
-              Next
-            </button>
+            {isLastQuestion ? (
+              <button
+                onClick={handleFinishExam}
+                disabled={!selectedAnswer}
+                className="btn-primary"
+              >
+                Finish Exam
+              </button>
+            ) : (
+              <button
+                onClick={handleNext}
+                disabled={!selectedAnswer}
+                className="btn-primary"
+              >
+                Next
+              </button>
+            )}
           </div>
         </div>
 

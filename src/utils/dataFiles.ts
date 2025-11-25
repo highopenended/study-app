@@ -10,6 +10,7 @@
 export const AVAILABLE_DATA_FILES: string[] = [
   'Math Questions.csv',
   'MLO Questions.csv',
+  'May Questions.csv',
 ];
 
 /**
