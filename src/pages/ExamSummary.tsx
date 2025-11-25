@@ -2,7 +2,7 @@
  * ExamSummary page component
  * Post-exam view displaying score, category breakdown, and all questions with correct answers highlighted
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Question } from '../models/question';
 
 interface ExamSummaryProps {
@@ -17,6 +17,14 @@ interface ScoreResult {
   total: number;
   percentage: number;
   passed: boolean;
+}
+
+interface CategoryScore {
+  topic: string;
+  correct: number;
+  incorrect: number;
+  total: number;
+  percentage: number;
 }
 
 /**
@@ -47,8 +55,49 @@ function calculateScore(questions: Question[], selectedAnswers: Record<number, n
   return { correct, incorrect, total, percentage, passed };
 }
 
+/**
+ * Calculate scores grouped by topic/category
+ */
+function calculateCategoryScores(questions: Question[], selectedAnswers: Record<number, number>): CategoryScore[] {
+  const categoryMap: Record<string, { correct: number; incorrect: number; total: number }> = {};
+
+  questions.forEach((question, index) => {
+    const topic = question.topic || 'Uncategorized';
+    const selectedAnswer = selectedAnswers[index];
+
+    if (!categoryMap[topic]) {
+      categoryMap[topic] = { correct: 0, incorrect: 0, total: 0 };
+    }
+
+    categoryMap[topic].total++;
+
+    if (selectedAnswer !== undefined && question.correctAnswer !== null) {
+      if (question.isCorrect(selectedAnswer)) {
+        categoryMap[topic].correct++;
+      } else {
+        categoryMap[topic].incorrect++;
+      }
+    } else {
+      // Unanswered questions count as incorrect
+      categoryMap[topic].incorrect++;
+    }
+  });
+
+  return Object.entries(categoryMap)
+    .map(([topic, stats]) => ({
+      topic,
+      correct: stats.correct,
+      incorrect: stats.incorrect,
+      total: stats.total,
+      percentage: stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0,
+    }))
+    .sort((a, b) => a.topic.localeCompare(b.topic));
+}
+
 export default function ExamSummary({ questions, selectedAnswers, onRestart }: ExamSummaryProps) {
+  const [isCategoryBreakdownOpen, setIsCategoryBreakdownOpen] = useState(true);
   const score = useMemo(() => calculateScore(questions, selectedAnswers), [questions, selectedAnswers]);
+  const categoryScores = useMemo(() => calculateCategoryScores(questions, selectedAnswers), [questions, selectedAnswers]);
 
   return (
     <div className="page-container">
@@ -78,6 +127,46 @@ export default function ExamSummary({ questions, selectedAnswers, onRestart }: E
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Category Breakdown Section */}
+      <div className="card">
+        <button
+          onClick={() => setIsCategoryBreakdownOpen(!isCategoryBreakdownOpen)}
+          className="category-breakdown-header"
+          aria-expanded={isCategoryBreakdownOpen}
+        >
+          <span>SCORING BREAKDOWN</span>
+          <span className="category-breakdown-arrow">
+            {isCategoryBreakdownOpen ? '▲' : '▼'}
+          </span>
+        </button>
+
+        {isCategoryBreakdownOpen && (
+          <div className="category-breakdown-content">
+            {categoryScores.map((category) => (
+              <div key={category.topic} className="category-item">
+                <div className="category-bar" />
+                <div className="category-info">
+                  <div className="category-name">{category.topic}</div>
+                </div>
+                <div className="category-stats">
+                  <div className="category-stat score-correct">
+                    <span className="score-icon">✓</span>
+                    <span>Correct: {category.correct}</span>
+                  </div>
+                  <div className="category-stat score-incorrect">
+                    <span className="score-icon">✗</span>
+                    <span>Incorrect: {category.incorrect}</span>
+                  </div>
+                  <div className={`category-percentage ${category.percentage >= 80 ? 'category-percentage-passed' : 'category-percentage-failed'}`}>
+                    {category.percentage}%
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="button-group">
