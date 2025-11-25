@@ -530,3 +530,108 @@ li {
 .category-percentage-failed {
   color: #d32f2f;
 }
+
+/* Exam Summary - Question List */
+.question-list-card {
+  max-width: 1200px;
+}
+
+.question-list-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: #333;
+}
+
+.question-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.summary-question {
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.summary-question:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.summary-question-header {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.summary-question-text {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.summary-question-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.summary-topic,
+.summary-subtopic {
+  font-size: 0.875rem;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.summary-answer-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.summary-answer-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  text-align: left;
+  background-color: transparent;
+  color: #666;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+.summary-answer-correct {
+  background-color: #e8f5e9;
+  border-color: #20b2aa;
+  color: #20b2aa;
+}
+
+.summary-answer-incorrect {
+  background-color: #ffebee;
+  border-color: #d32f2f;
+  color: #d32f2f;
+}
+
+.summary-answer-icon {
+  font-size: 1.25rem;
+  font-weight: bold;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.summary-answer-text {
+  flex: 1;
+  line-height: 1.5;
+}

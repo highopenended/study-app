@@ -169,6 +169,69 @@ export default function ExamSummary({ questions, selectedAnswers, onRestart }: E
         )}
       </div>
 
+      {/* Question List Section */}
+      <div className="card question-list-card">
+        <h2 className="question-list-title">Question Review</h2>
+        <div className="question-list">
+          {questions.map((question, index) => {
+            const selectedAnswer = selectedAnswers[index];
+            const isCorrect = selectedAnswer !== undefined && question.correctAnswer !== null && question.isCorrect(selectedAnswer);
+            const correctAnswerNum = question.correctAnswer;
+
+            return (
+              <div key={index} className="summary-question">
+                <div className="summary-question-header">
+                  Question {index + 1}
+                </div>
+                
+                <div className="summary-question-text">
+                  {question.question}
+                </div>
+
+                {(question.topic || question.subtopic) && (
+                  <div className="summary-question-meta">
+                    {question.topic && (
+                      <span className="summary-topic">Topic: {question.topic}</span>
+                    )}
+                    {question.subtopic && (
+                      <span className="summary-subtopic">Subtopic: {question.subtopic}</span>
+                    )}
+                  </div>
+                )}
+
+                <div className="summary-answer-options">
+                  {[1, 2, 3, 4].map((optionNum) => {
+                    const optionText = question.getOption(optionNum);
+                    const isCorrectAnswer = correctAnswerNum === optionNum;
+                    const isUserAnswer = selectedAnswer === optionNum;
+                    const isUserWrongAnswer = isUserAnswer && !isCorrect;
+
+                    let optionClass = 'summary-answer-option';
+                    if (isCorrectAnswer) {
+                      optionClass += ' summary-answer-correct';
+                    } else if (isUserWrongAnswer) {
+                      optionClass += ' summary-answer-incorrect';
+                    }
+
+                    return (
+                      <div key={optionNum} className={optionClass}>
+                        {isCorrectAnswer && (
+                          <span className="summary-answer-icon">✓</span>
+                        )}
+                        {isUserWrongAnswer && (
+                          <span className="summary-answer-icon">✗</span>
+                        )}
+                        <span className="summary-answer-text">{optionText}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="button-group">
         <button onClick={onRestart} className="btn-primary">
           Return To Course Home
